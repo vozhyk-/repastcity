@@ -60,10 +60,10 @@
   <mapcanvas name="theMapCanvas" annotationsVisible="1">
     <units>degrees</units>
     <extent>
-      <xmin>9.3748661846907595</xmin>
-      <ymin>36.54149611770591122</ymin>
-      <xmax>22.00907163306798964</xmax>
-      <ymax>41.58771446027085261</ymax>
+      <xmin>14.58218339953097065</xmin>
+      <ymin>37.05549064333936116</ymin>
+      <xmax>16.85225294528694207</xmax>
+      <ymax>42.05993129198318314</ymax>
     </extent>
     <rotation>0</rotation>
     <destinationsrs>
@@ -884,10 +884,10 @@
     </maplayer>
     <maplayer readOnly="0" type="vector" minScale="1e+08" simplifyAlgorithm="0" autoRefreshTime="0" simplifyMaxScale="1" simplifyDrawingHints="1" simplifyLocal="1" autoRefreshEnabled="0" maxScale="0" simplifyDrawingTol="1" styleCategories="AllStyleCategories" hasScaleBasedVisibilityFlag="0" refreshOnNotifyMessage="" labelsEnabled="0" geometry="Line" refreshOnNotifyEnabled="0">
       <extent>
-        <xmin>6.66819479353206379</xmin>
+        <xmin>12.53586102299999716</xmin>
         <ymin>35.49822222265038363</ymin>
-        <xmax>18.48544509743689801</xmax>
-        <ymax>47.09015248446060298</ymax>
+        <xmax>16.59474939197200527</xmax>
+        <ymax>40.79052734623925147</ymax>
       </extent>
       <id>roads_a3b0fef2_47ef_4361_a452_8f35345b6a6d</id>
       <datasource>./roads.shp|layerid=0</datasource>
