@@ -60,10 +60,10 @@
   <mapcanvas annotationsVisible="1" name="theMapCanvas">
     <units>degrees</units>
     <extent>
-      <xmin>14.20234989709178386</xmin>
-      <ymin>35.79338647787713512</ymin>
-      <xmax>17.30455485636631607</xmax>
-      <ymax>40.29340829381678191</ymax>
+      <xmin>14.12005444492010042</xmin>
+      <ymin>37.51567427476690852</ymin>
+      <xmax>16.54632221192227348</xmax>
+      <ymax>38.4500432280757849</ymax>
     </extent>
     <rotation>0</rotation>
     <destinationsrs>
@@ -121,7 +121,7 @@
       <extent>
         <xmin>14.76666999999999952</xmin>
         <ymin>37.5</ymin>
-        <xmax>15.64798691879873971</xmax>
+        <xmax>15.64941637680054143</xmax>
         <ymax>40.68333299999999753</ymax>
       </extent>
       <id>buildings_1d701c8b_5efa_4e93_9753_8665129f8d4b</id>
@@ -884,7 +884,7 @@
       <extent>
         <xmin>14.77011107638359988</xmin>
         <ymin>37.49890322073562743</ymin>
-        <xmax>15.64940070877995026</xmax>
+        <xmax>15.64949892896639128</xmax>
         <ymax>40.68994513742731556</ymax>
       </extent>
       <id>roads_a3b0fef2_47ef_4361_a452_8f35345b6a6d</id>
