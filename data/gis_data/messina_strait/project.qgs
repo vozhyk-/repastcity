@@ -60,10 +60,10 @@
   <mapcanvas annotationsVisible="1" name="theMapCanvas">
     <units>degrees</units>
     <extent>
-      <xmin>15.60985392946330208</xmin>
-      <ymin>37.92575056643242704</ymin>
-      <xmax>15.88372896220122144</xmax>
-      <ymax>38.3489095440899348</ymax>
+      <xmin>14.20234989709178386</xmin>
+      <ymin>35.79338647787713512</ymin>
+      <xmax>17.30455485636631607</xmax>
+      <ymax>40.29340829381678191</ymax>
     </extent>
     <rotation>0</rotation>
     <destinationsrs>
@@ -883,8 +883,8 @@
     <maplayer hasScaleBasedVisibilityFlag="0" labelsEnabled="0" autoRefreshEnabled="0" minScale="1e+08" type="vector" geometry="Line" maxScale="0" readOnly="0" refreshOnNotifyMessage="" autoRefreshTime="0" simplifyDrawingTol="1" refreshOnNotifyEnabled="0" styleCategories="AllStyleCategories" simplifyDrawingHints="1" simplifyAlgorithm="0" simplifyLocal="1" simplifyMaxScale="1">
       <extent>
         <xmin>14.77011107638359988</xmin>
-        <ymin>37.46680445365038281</ymin>
-        <xmax>15.66525501481172711</xmax>
+        <ymin>37.49890322073562743</ymin>
+        <xmax>15.64940070877995026</xmax>
         <ymax>40.68994513742731556</ymax>
       </extent>
       <id>roads_a3b0fef2_47ef_4361_a452_8f35345b6a6d</id>
