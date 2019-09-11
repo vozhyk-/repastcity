@@ -77,7 +77,7 @@ public abstract class GlobalVars {
 			public String distInMeters;
 		}
 
-		public static final double TRAVEL_PER_TURN = 1; // TODO Make a proper value for this
+		public static final double TRAVEL_PER_TURN = 100; // TODO Make a proper value for this
 	}
 	
 	/** Names of contexts and projections. These names must match those in the
