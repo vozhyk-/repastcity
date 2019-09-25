@@ -102,6 +102,8 @@ public class Route implements Cacheable {
 	// Record which function has added each coord, useful for debugging
 	private List<String> routeDescriptionX;
 
+	private boolean _isFerryControlled;
+
 	/*
 	 * Cache every coordinate which forms a road so that Route.onRoad() is quicker. Also save the Road(s) they are part
 	 * of, useful for the agent's awareness space (see getRoadFromCoordCache()).
@@ -427,6 +429,11 @@ public class Route implements Cacheable {
 
 			while (!travelledMaxDist && !this.atDestination()) {
 				target = this.routeX.get(this.currentPosition);
+				Road road = this.roadsX.get(this.currentPosition);
+				if (road.isFerryRoute()) {
+					setFerryControlled(true);
+					return;
+				}
 				speed = this.routeSpeedsX.get(this.currentPosition);
 				/*
 				 * TODO Remember which roads have been passed, used to work out what should be added to cognitive map.
@@ -1012,6 +1019,14 @@ public class Route implements Cacheable {
 	 */
 	public boolean atDestination() {
 		return ContextManager.getAgentGeometry(this.agent).getCoordinate().equals(this.destination);
+	}
+
+	public boolean isFerryControlled() {
+		return this._isFerryControlled;
+	}
+
+	private void setFerryControlled(boolean value) {
+		this._isFerryControlled = value;
 	}
 
 	// /**
