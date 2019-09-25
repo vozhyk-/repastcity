@@ -358,6 +358,9 @@ public class Route implements Cacheable {
 	private void addToRoute(Coordinate coord, Road road, double speed, String description) {
 		this.routeX.add(coord);
 		this.roadsX.add(road);
+		if (!(road == Road.nullRoad)) {
+			LOGGER.log(Level.WARNING, "                    addToRoute: road: " + road + "; isFerryRoute: " + road.isFerryRoute());
+		}
 		this.routeSpeedsX.add(speed);
 		this.routeDescriptionX.add(description);
 	}

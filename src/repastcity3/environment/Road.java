@@ -55,6 +55,10 @@ public class Road implements FixedGeography, Identified {
 	// The NetworkEdge which represents this Road in the roadNetwork
 	transient private NetworkEdge<Junction> edge;
 
+	// "1" if the road is a ferry route
+	// and can only be traversed by a ferry.
+	private String is_ferry_r;
+
 	// These determine whether or not the the road can be traversed on foot and/or by car.
 	private String access; // To be used by ShapefileLoader, should contain string of words separated by spaces
 	private List<String> accessibility; // access String should be parsed into this list (see initialise()).
@@ -241,6 +245,14 @@ public class Road implements FixedGeography, Identified {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String isFerryRoute() {
+		return is_ferry_r;
+	}
+
+	public void setIsFerryRoute(String is_ferry_r) {
+		this.is_ferry_r = is_ferry_r;
 	}
 
 	/**
