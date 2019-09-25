@@ -243,6 +243,11 @@ public class Road implements FixedGeography, Identified {
 		this.name = name;
 	}
 
+	public boolean isFerryRoute() {
+		// TODO Read this from a column in the roads shapefile.
+		return "42".equals(this.identifier);
+	}
+
 	/**
 	 * Checks to see if passed object is a Road and if the unique id's are equal
 	 */
