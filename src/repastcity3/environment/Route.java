@@ -102,7 +102,8 @@ public class Route implements Cacheable {
 	// Record which function has added each coord, useful for debugging
 	private List<String> routeDescriptionX;
 
-	private boolean _isFerryControlled;
+	private boolean _isFerryControlled = false;
+	private boolean _travelingAsFerry = false;
 
 	/*
 	 * Cache every coordinate which forms a road so that Route.onRoad() is quicker. Also save the Road(s) they are part
@@ -430,7 +431,7 @@ public class Route implements Cacheable {
 			while (!travelledMaxDist && !this.atDestination()) {
 				target = this.routeX.get(this.currentPosition);
 				Road road = this.roadsX.get(this.currentPosition);
-				if (road.isFerryRoute()) {
+				if (road.isFerryRoute() && !isTravelingAsFerry()) {
 					setFerryControlled(true);
 					return;
 				}
@@ -1081,6 +1082,14 @@ public class Route implements Cacheable {
 	// TempLogger.out("ROUTE AFTER REMOVING PAIRS");
 	// this.printRoute();
 	// }
+
+	public boolean isTravelingAsFerry() {
+		return _travelingAsFerry;
+	}
+
+	public void setTravelingAsFerry() {
+		this._travelingAsFerry = true;
+	}
 
 	private void printRoute() {
 		StringBuilder out = new StringBuilder();

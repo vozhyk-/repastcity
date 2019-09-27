@@ -1,11 +1,26 @@
 package repastcity3.agent;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+
+import repast.simphony.util.collections.IndexedIterable;
 import repastcity3.environment.Building;
+import repastcity3.environment.Route;
+import repastcity3.environment.SpatialIndexManager;
+import repastcity3.main.ContextManager;
 
 public class FerryAgent implements IAgent {
+	private static final double CLOSEST_CARS_DISTANCE = 0.005;
+	private static final double CLOSEST_TERMINAL_DISTANCE = 0.005;
+
 	private static Logger LOGGER = Logger.getLogger(FerryAgent.class.getName());
 
 	private Building home;
@@ -13,14 +28,72 @@ public class FerryAgent implements IAgent {
 	private static int uniqueID = 0;
 	private int id;
 
+	private List<DefaultAgent> loadedCars;
+	private Route route;
+
 	public FerryAgent() {
 		this.id = uniqueID++;
 	}
 
 	@Override
 	public void step() throws Exception {
-		// TODO Auto-generated method stub
+		if (this.route == null) {
+			loadCars();
+			setRouteToOppositeTerminal();
+		}
 
+		if (!this.route.atDestination()) {
+			this.route.travel();
+		} else {
+			unloadCars();
+			this.route = null;
+		}
+	}
+
+	private void loadCars() {
+		// TODO Hide and remove the cars from the map.
+		this.loadedCars = StreamSupport.stream(getClosestCars().spliterator(), false)
+			    .collect(Collectors.toList());
+	}
+
+	private void unloadCars() {
+		// TODO Signal the cars to move.
+		this.loadedCars = null;
+	}
+
+	private void setRouteToOppositeTerminal() {
+		Building destination = getOppositeTerminal();
+		this.route = new Route(this, destination.getCoords(), destination);
+		this.route.setTravelingAsFerry();
+	}
+
+	private Building getOppositeTerminal() {
+		Building thisTerminal = getClosestTerminal();
+		// TODO This works only if there are only 2 terminals in the world.
+		// Find a way to define the opposite terminal in the shapefile.
+		IndexedIterable<Building> otherTerminals = ContextManager.ferryTerminalContext.getObjects(Building.class);
+		Optional<Building> oppositeTerminal = StreamSupport.stream(otherTerminals.spliterator(), false).filter(
+				(terminal) -> !terminal.equals(thisTerminal)).findAny();
+		return oppositeTerminal.get();
+	}
+
+	private Building getClosestTerminal() {
+		Envelope envelope = getClosestSquareEnvelope(FerryAgent.CLOSEST_TERMINAL_DISTANCE);
+		Iterable<Building> closestTerminals = ContextManager.buildingProjection.getObjectsWithin(envelope, Building.class);
+		Optional<Building> thisTerminal = StreamSupport.stream(closestTerminals.spliterator(), false).findAny();
+		return thisTerminal.get();
+	}
+
+	private Iterable<DefaultAgent> getClosestCars() {
+		Envelope envelope = getClosestSquareEnvelope(FerryAgent.CLOSEST_CARS_DISTANCE);
+		return ContextManager.getAgentGeography().getObjectsWithin(envelope, DefaultAgent.class);
+	}
+
+	private Envelope getClosestSquareEnvelope(double dist) {
+		Geometry location = ContextManager.getAgentGeography().getGeometry(this);
+		Coordinate coord = location.getCoordinate();
+		Envelope envelope = new Envelope(coord.x - dist, coord.x + dist, coord.y - dist, coord.y + dist);
+		return envelope;
 	}
 
 	@Override
