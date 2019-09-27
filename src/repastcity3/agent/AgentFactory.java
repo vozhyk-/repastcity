@@ -189,14 +189,27 @@ public class AgentFactory {
 			while (i.hasNext() && agentsCreated < numAgents) {
 				Building b = i.next(); // Find a building
 				IAgent a = new DefaultAgent(); // Create a new agent
-				a.setHome(b); // Tell the agent where it lives
-				b.addAgent(a); // Tell the building that the agent lives there
-				ContextManager.addAgentToContext(a); // Add the agent to the context
-				// Finally move the agent to the place where it lives.
-				ContextManager.moveAgent(a, ContextManager.buildingProjection.getGeometry(b).getCentroid());
+				putAgent(a, b);
 				agentsCreated++;
 			}
 		}
+
+		// Put a ferry agent in a ferry terminal.
+		// TODO Choose from ferry terminals instead of cities.
+		// TODO Allow creating more ferry agents.
+		Iterator<Building> i = ContextManager.buildingContext.getRandomObjects(Building.class, numAgents)
+				.iterator();
+		Building b = i.next();
+		IAgent a = new FerryAgent();
+		putAgent(a, b);
+	}
+
+	private void putAgent(IAgent a, Building b) {
+		a.setHome(b); // Tell the agent where it lives
+		b.addAgent(a); // Tell the building that the agent lives there
+		ContextManager.addAgentToContext(a); // Add the agent to the context
+		// Finally move the agent to the place where it lives.
+		ContextManager.moveAgent(a, ContextManager.buildingProjection.getGeometry(b).getCentroid());
 	}
 
 	/**

@@ -26,6 +26,10 @@
       <string>repastcity3.agent.DefaultAgent</string>
       <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
     </entry>
+    <entry>
+      <string>repastcity3.agent.FerryAgent</string>
+      <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
+    </entry>
   </styles>
   <editedStyles/>
   <netStyles/>
@@ -84,6 +88,10 @@
     <entry>
       <string>repastcity3.agent.DefaultAgent</string>
       <int>10</int>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.FerryAgent</string>
+      <int>14</int>
     </entry>
   </layerOrder>
   <projections>
