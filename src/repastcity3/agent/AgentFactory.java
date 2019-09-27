@@ -197,7 +197,7 @@ public class AgentFactory {
 		// Put a ferry agent in a ferry terminal.
 		// TODO Choose from ferry terminals instead of cities.
 		// TODO Allow creating more ferry agents.
-		Iterator<Building> i = ContextManager.buildingContext.getRandomObjects(Building.class, numAgents)
+		Iterator<Building> i = ContextManager.ferryTerminalContext.getRandomObjects(Building.class, numAgents)
 				.iterator();
 		Building b = i.next();
 		IAgent a = new FerryAgent();

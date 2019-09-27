@@ -40,6 +40,7 @@ public abstract class GlobalVars {
 	/* These are strings that match entries in the repastcity.properties file.*/
 	public static final String GISDataDirectory = "GISDataDirectory";
 	public static final String BuildingShapefile = "BuildingShapefile";
+	public static final String FerryTerminalShapefile = "FerryTerminalShapefile";
 	public static final String RoadShapefile = "RoadShapefile";
 	public static final String BuildingsRoadsCoordsCache = "BuildingsRoadsCoordsCache";
 	public static final String BuildingsRoadsCache = "BuildingsRoadsCache";

@@ -91,6 +91,7 @@ public class ContextManager implements ContextBuilder<Object> {
 	// building context and projection cab be public (thread safe) because buildings only queried
 	public static Context<Building> buildingContext;
 	public static Geography<Building> buildingProjection;
+	public static Context<Building> ferryTerminalContext;
 
 	public static Context<Road> roadContext;
 	public static Geography<Road> roadProjection;
@@ -137,6 +138,15 @@ public class ContextManager implements ContextBuilder<Object> {
 			SpatialIndexManager.createIndex(buildingProjection, Building.class);
 			LOGGER.log(Level.FINER, "Read " + buildingContext.getObjects(Building.class).size() + " buildings from "
 					+ buildingFile);
+
+			// Create the ferry terminals - context and geography projection
+			ferryTerminalContext = new BuildingContext();
+			String ferryTerminalFile = gisDataDir + getProperty(GlobalVars.FerryTerminalShapefile);
+			GISFunctions.readShapefile(Building.class, ferryTerminalFile, buildingProjection, ferryTerminalContext);
+			mainContext.addSubContext(ferryTerminalContext);
+			SpatialIndexManager.createIndex(buildingProjection, Building.class);
+			LOGGER.log(Level.FINER, "Read " + ferryTerminalContext.getObjects(Building.class).size() + " buildings from "
+					+ ferryTerminalFile);
 
 			// TODO Cast the buildings to their correct subclass
 
