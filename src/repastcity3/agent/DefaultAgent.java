@@ -53,6 +53,8 @@ public class DefaultAgent implements IAgent {
 			this.route = new Route(this, b.getCoords(), b);
 			LOGGER.log(Level.FINE, this.toString() + " created new route to " + b.toString());
 		}
+		if (isWaitingForFerry())
+			return;
 		if (!this.route.atDestination()) {
 			this.route.travel();
 			LOGGER.log(Level.FINE, this.toString() + " travelling to " + this.route.getDestinationBuilding().toString());
@@ -73,6 +75,14 @@ public class DefaultAgent implements IAgent {
 		}
 
 	} // step()
+
+	public boolean isWaitingForFerry() {
+		return this.route != null && this.route.isFerryControlled();
+	}
+
+	public void onUnloadedFromFerry() {
+		this.route = new Route(this, this.route.getDestination(), this.route.getDestinationBuilding());
+	}
 
 	/**
 	 * There will be no inter-agent communication so these agents can be executed simulataneously in separate threads.

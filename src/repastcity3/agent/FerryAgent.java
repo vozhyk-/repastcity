@@ -51,13 +51,18 @@ public class FerryAgent implements IAgent {
 	}
 
 	private void loadCars() {
-		// TODO Hide and remove the cars from the map.
 		this.loadedCars = StreamSupport.stream(getClosestCars().spliterator(), false)
+			    .filter(DefaultAgent::isWaitingForFerry)
 			    .collect(Collectors.toList());
+		for (DefaultAgent car: this.loadedCars)
+			ContextManager.removeAgentFromContext(car);
 	}
 
 	private void unloadCars() {
-		// TODO Signal the cars to move.
+		for (DefaultAgent car: this.loadedCars) {
+			ContextManager.addAndPlaceAgent(car, ContextManager.getAgentGeometry(this).getCentroid());
+			car.onUnloadedFromFerry();
+		}
 		this.loadedCars = null;
 	}
 
@@ -86,11 +91,11 @@ public class FerryAgent implements IAgent {
 
 	private Iterable<DefaultAgent> getClosestCars() {
 		Envelope envelope = getClosestSquareEnvelope(FerryAgent.CLOSEST_CARS_DISTANCE);
-		return ContextManager.getAgentGeography().getObjectsWithin(envelope, DefaultAgent.class);
+		return ContextManager.getAgentsWithin(envelope, DefaultAgent.class);
 	}
 
 	private Envelope getClosestSquareEnvelope(double dist) {
-		Geometry location = ContextManager.getAgentGeography().getGeometry(this);
+		Geometry location = ContextManager.getAgentGeometry(this);
 		Coordinate coord = location.getCoordinate();
 		Envelope envelope = new Envelope(coord.x - dist, coord.x + dist, coord.y - dist, coord.y + dist);
 		return envelope;

@@ -31,6 +31,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
@@ -49,6 +50,7 @@ import repast.simphony.space.gis.SimpleAdder;
 import repast.simphony.space.graph.Network;
 import repast.simphony.space.graph.RepastEdge;
 import repastcity3.agent.AgentFactory;
+import repastcity3.agent.DefaultAgent;
 import repastcity3.agent.IAgent;
 import repastcity3.agent.ThreadedAgentScheduler;
 import repastcity3.environment.Building;
@@ -535,10 +537,22 @@ public class ContextManager implements ContextBuilder<Object> {
 	}
 
 	/**
+	 * Remove an agent from the agent context. This method is required -- rather than giving agents direct access to the
+	 * agentGeography -- because when multiple threads are used they can interfere with each other and agents end up
+	 * moving incorrectly.
+	 *
+	 * @param agent
+	 *            The agent to remove.
+	 */
+	public static synchronized void removeAgentFromContext(IAgent agent) {
+		ContextManager.agentContext.remove(agent);
+	}
+
+	/**
 	 * Get all the agents in the agent context. This method is required -- rather than giving agents direct access to
 	 * the agentGeography -- because when multiple threads are used they can interfere with each other and agents end up
 	 * moving incorrectly.
-	 * 
+	 *
 	 * @return An iterable over all agents, chosen in a random order. See the <code>getRandomObjects</code> function in
 	 *         <code>DefaultContext</code>
 	 * @see DefaultContext
@@ -548,12 +562,33 @@ public class ContextManager implements ContextBuilder<Object> {
 	}
 
 	/**
+	 * Get the agents within @param envelope. This method is required -- rather than giving agents direct access to
+	 * the agentGeography -- because when multiple threads are used they can interfere with each other and agents end up
+	 * moving incorrectly.
+	 * 
+	 * @return An iterable over the agents.
+	 */
+	public static synchronized <T> Iterable<T> getAgentsWithin(Envelope envelope, Class<T> class1) {
+		return ContextManager.agentGeography.getObjectsWithin(envelope, class1);
+	}
+
+	/**
 	 * Get the geometry of the given agent. This method is required -- rather than giving agents direct access to the
 	 * agentGeography -- because when multiple threads are used they can interfere with each other and agents end up
 	 * moving incorrectly.
 	 */
 	public static synchronized Geometry getAgentGeometry(IAgent agent) {
 		return ContextManager.agentGeography.getGeometry(agent);
+	}
+
+	/**
+	 * Add the agent to the context and place it.
+	 * This is synchronized so that the outside
+	 * doesn't see the point of time between the agent being added and placed.
+	 */
+	public static synchronized void addAndPlaceAgent(IAgent agent, Point point) {
+		addAgentToContext(agent);
+		moveAgent(agent, point);
 	}
 
 	/**
