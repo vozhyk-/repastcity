@@ -430,11 +430,23 @@ public class Route implements Cacheable {
 
 			while (!travelledMaxDist && !this.atDestination()) {
 				target = this.routeX.get(this.currentPosition);
-				Road road = this.roadsX.get(this.currentPosition);
-				if (road.isFerryRoute() && !isTravelingAsFerry()) {
+				Road targetRoad = this.roadsX.get(this.currentPosition);
+
+				Coordinate prevCoord = null;
+				Road prevRoad = null;
+				if (this.currentPosition - 1 >= 0) {
+					prevCoord = this.routeX.get(this.currentPosition - 1);
+					prevRoad = this.roadsX.get(this.currentPosition - 1);
+				}
+
+				boolean movingWithinRoad = targetRoad.equals(prevRoad);
+				boolean roadIsSignificant = !target.equals(prevCoord);
+				boolean enteringFerryRoute = movingWithinRoad && roadIsSignificant && targetRoad.isFerryRoute();
+				if (enteringFerryRoute && !isTravelingAsFerry()) {
 					setFerryControlled(true);
 					return;
 				}
+
 				speed = this.routeSpeedsX.get(this.currentPosition);
 				/*
 				 * TODO Remember which roads have been passed, used to work out what should be added to cognitive map.
