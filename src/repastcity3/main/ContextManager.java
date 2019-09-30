@@ -199,45 +199,30 @@ public class ContextManager implements ContextBuilder<Object> {
 			return null;
 		}
 
-		// Now create the agents (note that their step methods are scheduled later
+		agentContext = new AgentContext();
+		mainContext.addSubContext(agentContext);
+		agentGeography = GeographyFactoryFinder.createGeographyFactory(null).createGeography(
+				GlobalVars.CONTEXT_NAMES.AGENT_GEOGRAPHY, agentContext,
+				new GeographyParameters<IAgent>(new SimpleAdder<IAgent>()));
+
 		try {
-
-			agentContext = new AgentContext();
-			mainContext.addSubContext(agentContext);
-			agentGeography = GeographyFactoryFinder.createGeographyFactory(null).createGeography(
-					GlobalVars.CONTEXT_NAMES.AGENT_GEOGRAPHY, agentContext,
-					new GeographyParameters<IAgent>(new SimpleAdder<IAgent>()));
-
-			String agentDefn = ContextManager.getParameter(MODEL_PARAMETERS.AGENT_DEFINITION.toString());
-
-			LOGGER.log(Level.INFO, "Creating agents with the agent definition: '" + agentDefn + "'");
-
-			AgentFactory agentFactory = new AgentFactory(agentDefn);
-			agentFactory.createAgents(agentContext);
-
-		} catch (ParameterNotFoundException e) {
-			LOGGER.log(Level.SEVERE, "Could not find the parameter which defines how agents should be "
-					+ "created. The parameter is called " + MODEL_PARAMETERS.AGENT_DEFINITION
-					+ " and should be added to the parameters.xml file.", e);
-			return null;
-		} catch (AgentCreationException e) {
-			LOGGER.log(Level.SEVERE, "", e);
+			createSchedule();
+		} catch (ParameterNotFoundException | AgentCreationException e) {
 			return null;
 		}
-
-		// Create the schedule
-		createSchedule();
 
 		return mainContext;
 	}
 
 
-	private void createSchedule() {
+	private void createSchedule() throws ParameterNotFoundException, AgentCreationException {
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 
 		// Schedule something that outputs ticks every 1000 iterations.
 		schedule.schedule(ScheduleParameters.createRepeating(1, 1000, ScheduleParameters.LAST_PRIORITY), this,
 				"printTicks");
+
+		scheduleAgentCreation(schedule);
 
 		/*
 		 * Schedule the agents. This is slightly complicated because if all the agents can be stepped at the same time
@@ -274,6 +259,25 @@ public class ContextManager implements ContextBuilder<Object> {
 			}
 		}
 
+	}
+
+	private void scheduleAgentCreation(ISchedule schedule) throws ParameterNotFoundException, AgentCreationException {
+		try {
+			String agentDefn = ContextManager.getParameter(MODEL_PARAMETERS.AGENT_DEFINITION.toString());
+
+			LOGGER.log(Level.INFO, "Creating agents with the agent definition: '" + agentDefn + "'");
+
+			AgentFactory agentFactory = new AgentFactory(agentDefn, schedule);
+			agentFactory.createAgents(agentContext);
+		} catch (ParameterNotFoundException e) {
+			LOGGER.log(Level.SEVERE, "Could not find the parameter which defines how agents should be "
+					+ "created. The parameter is called " + MODEL_PARAMETERS.AGENT_DEFINITION
+					+ " and should be added to the parameters.xml file.", e);
+			throw e;
+		} catch (AgentCreationException e) {
+			LOGGER.log(Level.SEVERE, "", e);
+			throw e;
+		}
 	}
 
 	private static long speedTimer = -1; // For recording time per N iterations 

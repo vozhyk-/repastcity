@@ -22,6 +22,10 @@ import java.util.logging.Logger;
 import com.vividsolutions.jts.geom.Geometry;
 
 import repast.simphony.context.Context;
+import repast.simphony.engine.schedule.IAction;
+import repast.simphony.engine.schedule.ISchedule;
+import repast.simphony.engine.schedule.Schedule;
+import repast.simphony.engine.schedule.ScheduleParameters;
 import repastcity3.environment.Building;
 import repastcity3.environment.GISFunctions;
 import repastcity3.environment.SpatialIndexManager;
@@ -112,12 +116,16 @@ public class AgentFactory {
 	/** The definition of the agents - specific to the method being used */
 	private String definition;
 
+	/** The schedule used to create agents at different times */
+	private ISchedule schedule;
+
 	/**
 	 * Create a new agent factory from the given definition.
 	 * 
 	 * @param agentDefinition
+	 * @param schedule
 	 */
-	public AgentFactory(String agentDefinition) throws AgentCreationException {
+	public AgentFactory(String agentDefinition, ISchedule schedule) throws AgentCreationException {
 
 		// First try to parse the definition
 		String[] split = agentDefinition.split(":");
@@ -146,6 +154,7 @@ public class AgentFactory {
 		}
 
 		this.definition = defn; // Method is OK, save the definition for creating agents later.
+		this.schedule = schedule;
 
 		// Check the rest of the definition is also correct (passing false means don't create agents)
 		// An exception will be thrown if it doesn't work.
@@ -167,41 +176,49 @@ public class AgentFactory {
 	 */
 	private void createRandomAgents(boolean dummy) throws AgentCreationException {
 		// Check the definition is as expected, in this case it should be a number
-		int numAgents = -1;
-		try {
-			numAgents = Integer.parseInt(this.definition);
-		} catch (NumberFormatException ex) {
-			throw new AgentCreationException("Using " + this.methodToUse + " method to create "
-					+ "agents but cannot convert " + this.definition + " into an integer.");
-		}
+		final int numAgents = parseNumAgents();
 		// The definition has been parsed OK, no can either stop or create the agents
 		if (dummy) {
 			return;
 		}
 
-		// Create agents in randomly chosen houses. Use two while loops in case there are more agents
-		// than houses, so that houses have to be looped over twice.
-		LOGGER.info("Creating " + numAgents + " agents using " + this.methodToUse + " method.");
-		int agentsCreated = 0;
-		while (agentsCreated < numAgents) {
-			Iterator<Building> i = ContextManager.buildingContext.getRandomObjects(Building.class, numAgents)
-					.iterator();
-			while (i.hasNext() && agentsCreated < numAgents) {
-				Building b = i.next(); // Find a building
-				IAgent a = new DefaultAgent(); // Create a new agent
-				putAgent(a, b);
+		// TODO Move these to global constants or factory parameters.
+		double maxStart = 100;
+		double minInterval = 100;
+		double maxInterval = 10000;
+		ScheduleParameters params = ScheduleParameters.createUniformProbabilityRepeating(
+				0, maxStart , minInterval , maxInterval, 0);
+
+		this.schedule.schedule(params, new IAction() {
+			int agentsCreated = 0;
+
+			@Override
+			public void execute() {
+				if (agentsCreated >= numAgents)
+					return;
+
+				Building b = ContextManager.buildingContext.getRandomObject();
+				putAgent(new DefaultAgent(), b);
 				agentsCreated++;
 			}
-		}
+		});
 
 		// Put a ferry agent in a ferry terminal.
-		// TODO Choose from ferry terminals instead of cities.
 		// TODO Allow creating more ferry agents.
 		Iterator<Building> i = ContextManager.ferryTerminalContext.getRandomObjects(Building.class, numAgents)
 				.iterator();
 		Building b = i.next();
 		IAgent a = new FerryAgent();
 		putAgent(a, b);
+	}
+
+	private int parseNumAgents() throws AgentCreationException {
+		try {
+			return Integer.parseInt(this.definition);
+		} catch (NumberFormatException ex) {
+			throw new AgentCreationException("Using " + this.methodToUse + " method to create "
+					+ "agents but cannot convert " + this.definition + " into an integer.");
+		}
 	}
 
 	private void putAgent(IAgent a, Building b) {
