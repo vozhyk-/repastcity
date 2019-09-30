@@ -11,6 +11,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
+import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.util.collections.IndexedIterable;
 import repastcity3.environment.Building;
 import repastcity3.environment.Route;
@@ -20,6 +21,7 @@ import repastcity3.main.ContextManager;
 public class FerryAgent implements IAgent {
 	private static final double CLOSEST_CARS_DISTANCE = 0.005;
 	private static final double CLOSEST_TERMINAL_DISTANCE = 0.005;
+	private static final double DEPART_EACH_N_TICKS = 1000;
 
 	private static Logger LOGGER = Logger.getLogger(FerryAgent.class.getName());
 
@@ -38,6 +40,8 @@ public class FerryAgent implements IAgent {
 	@Override
 	public void step() throws Exception {
 		if (this.route == null) {
+			if (!timeToLeave())
+				return;
 			loadCars();
 			setRouteToOppositeTerminal();
 		}
@@ -48,6 +52,11 @@ public class FerryAgent implements IAgent {
 			unloadCars();
 			this.route = null;
 		}
+	}
+
+	private boolean timeToLeave() {
+		double now = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
+		return now % DEPART_EACH_N_TICKS == 0;
 	}
 
 	private void loadCars() {
