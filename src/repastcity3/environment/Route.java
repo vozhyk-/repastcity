@@ -137,6 +137,8 @@ public class Route implements Cacheable {
 	 */
 	private Road previousRoad;
 	private Area previousArea;
+	private double maxTravelPerTurn;
+	private double minTravelPerTurn;
 
 	/**
 	 * Creates a new Route object.
@@ -153,10 +155,12 @@ public class Route implements Cacheable {
 	 * @param type
 	 *            The (optional) type of route, used by burglars who want to search.
 	 */
-	public Route(IAgent agent, Coordinate destination, Building destinationBuilding) {
+	public Route(IAgent agent, Coordinate destination, Building destinationBuilding, double minTravelPerTurn, double maxTravelPerTurn) {
 		this.destination = destination;
 		this.agent = agent;
 		this.destinationBuilding = destinationBuilding;
+		this.minTravelPerTurn = minTravelPerTurn;
+		this.maxTravelPerTurn = maxTravelPerTurn;
 	}
 
 	/**

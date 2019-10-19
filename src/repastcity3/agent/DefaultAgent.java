@@ -28,6 +28,10 @@ import repastcity3.main.ContextManager;
 
 public class DefaultAgent implements IAgent {
 
+	private static final int MAX_TRAVEL_PER_TURN = 125;
+
+	private static final int MIN_TRAVEL_PER_TURN = 75;
+
 	private static Logger LOGGER = Logger.getLogger(DefaultAgent.class.getName());
 
 	private Building home; // Where the agent lives
@@ -50,7 +54,7 @@ public class DefaultAgent implements IAgent {
 			this.goingHome = false; // Must be leaving home
 			// Choose a new building to go to
 			Building b = ContextManager.buildingContext.getRandomObject();
-			this.route = new Route(this, b.getCoords(), b);
+			this.route = new Route(this, b.getCoords(), b, MIN_TRAVEL_PER_TURN, MAX_TRAVEL_PER_TURN);
 			LOGGER.log(Level.FINE, this.toString() + " created new route to " + b.toString());
 		}
 		if (isWaitingForFerry())
@@ -63,13 +67,13 @@ public class DefaultAgent implements IAgent {
 			if (this.goingHome) {
 				this.goingHome = false;
 				Building b = ContextManager.buildingContext.getRandomObject();
-				this.route = new Route(this, b.getCoords(), b);
+				this.route = new Route(this, b.getCoords(), b, MIN_TRAVEL_PER_TURN, MAX_TRAVEL_PER_TURN);
 				LOGGER.log(Level.FINE, this.toString() + " reached home, now going to " + b.toString());
 			} else {
 				LOGGER.log(Level.FINE, this.toString() + " reached " + this.route.getDestinationBuilding().toString()
 						+ ", now going home");
 				this.goingHome = true;
-				this.route = new Route(this, this.home.getCoords(), this.home);
+				this.route = new Route(this, this.home.getCoords(), this.home, MIN_TRAVEL_PER_TURN, MAX_TRAVEL_PER_TURN);
 			}
 
 		}
@@ -81,7 +85,7 @@ public class DefaultAgent implements IAgent {
 	}
 
 	public void onUnloadedFromFerry() {
-		this.route = new Route(this, this.route.getDestination(), this.route.getDestinationBuilding());
+		this.route = new Route(this, this.route.getDestination(), this.route.getDestinationBuilding(), MIN_TRAVEL_PER_TURN, MAX_TRAVEL_PER_TURN);
 	}
 
 	/**
