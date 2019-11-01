@@ -1,21 +1,17 @@
-<repast.simphony.gis.visualization.engine.GISDisplayDescriptor simphonyVersion="2.5.0">
+<repast.simphony.gis.visualization.engine.GISDisplayDescriptor simphonyVersion="2.6.0">
   <name>GIS (3D)</name>
   <type>GIS 3D</type>
   <styles>
-    <entry>
-      <string>repastcity3.agent.ThreadController</string>
-      <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
-    </entry>
     <entry>
       <string>repastcity3.agent.ThreadedAgentScheduler</string>
       <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
     </entry>
     <entry>
-      <string>repastcity3.agent.BurglarThread</string>
+      <string>repastcity3.agent.IAgent</string>
       <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
     </entry>
     <entry>
-      <string>repastcity3.agent.IAgent</string>
+      <string>repastcity3.agent.FerryAgent</string>
       <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
     </entry>
     <entry>
@@ -27,7 +23,11 @@
       <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
     </entry>
     <entry>
-      <string>repastcity3.agent.FerryAgent</string>
+      <string>repastcity3.agent.BurglarThread</string>
+      <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.ThreadController</string>
       <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
     </entry>
   </styles>
@@ -39,39 +39,16 @@
     <start>1.0</start>
     <interval>1.0</interval>
     <priority>-Infinity</priority>
+    <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
+    <hashCode>0</hashCode>
   </schedParams>
   <layoutInterval>0</layoutInterval>
   <layerOrder>
     <entry>
-      <string>Blue Marble May 2004</string>
-      <int>1</int>
-    </entry>
-    <entry>
-      <string>Bing Imagery</string>
-      <int>3</int>
-    </entry>
-    <entry>
-      <string>i-cubed Landsat</string>
-      <int>2</int>
-    </entry>
-
-    <entry>
-      <string>repastcity3.agent.ThreadController</string>
-      <int>5</int>
-    </entry>
-    <entry>
       <string>repastcity3.agent.ThreadedAgentScheduler</string>
       <int>7</int>
-    </entry>
-    <entry>
-      <string>repastcity3.agent.BurglarThread</string>
-      <int>6</int>
-    </entry>
-    <entry>
-      <string>data/gis_data/messina_strait/buildings.shp</string>
-      <int>11</int>
     </entry>
     <entry>
       <string>repastcity3.agent.IAgent</string>
@@ -82,6 +59,18 @@
       <int>13</int>
     </entry>
     <entry>
+      <string>Blue Marble May 2004</string>
+      <int>1</int>
+    </entry>
+    <entry>
+      <string>Bing Imagery</string>
+      <int>3</int>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.FerryAgent</string>
+      <int>14</int>
+    </entry>
+    <entry>
       <string>repastcity3.agent.AgentFactory</string>
       <int>9</int>
     </entry>
@@ -90,8 +79,20 @@
       <int>10</int>
     </entry>
     <entry>
-      <string>repastcity3.agent.FerryAgent</string>
-      <int>14</int>
+      <string>i-cubed Landsat</string>
+      <int>2</int>
+    </entry>
+    <entry>
+      <string>data/gis_data/messina_strait/buildings.shp</string>
+      <int>11</int>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.BurglarThread</string>
+      <int>6</int>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.ThreadController</string>
+      <int>5</int>
     </entry>
   </layerOrder>
   <projections>
@@ -111,7 +112,6 @@
     </entry>
   </projectionDescriptors>
   <props/>
-
   <backgroundColor>
     <red>255</red>
     <green>255</green>
@@ -135,6 +135,6 @@
       <boolean>true</boolean>
     </entry>
   </globeLayers>
-
-
+  <staticCoverages/>
+  <coverageLayers/>
 </repast.simphony.gis.visualization.engine.GISDisplayDescriptor>
