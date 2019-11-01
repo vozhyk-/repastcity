@@ -32,6 +32,8 @@ public class FerryAgent implements IAgent {
 
 	private List<DefaultAgent> loadedCars;
 	private Route route;
+	private int maxLoadedCarCount = 5; // TODO Add this to the constructor
+	private int lastLoadedCarCount = 0;
 
 	public FerryAgent() {
 		this.id = uniqueID++;
@@ -62,9 +64,13 @@ public class FerryAgent implements IAgent {
 	private void loadCars() {
 		this.loadedCars = StreamSupport.stream(getClosestCars().spliterator(), false)
 			    .filter(DefaultAgent::isWaitingForFerry)
+			    .limit(this.maxLoadedCarCount)
 			    .collect(Collectors.toList());
-		for (DefaultAgent car: this.loadedCars)
+		for (DefaultAgent car: this.loadedCars) {
+			car.onLoadingToFerry();
 			ContextManager.removeAgentFromContext(car);
+		}
+		this.lastLoadedCarCount = this.loadedCars.size();
 	}
 
 	private void unloadCars() {
@@ -108,6 +114,14 @@ public class FerryAgent implements IAgent {
 		Coordinate coord = location.getCoordinate();
 		Envelope envelope = new Envelope(coord.x - dist, coord.x + dist, coord.y - dist, coord.y + dist);
 		return envelope;
+	}
+
+	public int getLastLoadedCarCount() {
+		return this.lastLoadedCarCount;
+	}
+
+	public double getLastUtilization() {
+		return (double)getLastLoadedCarCount() / this.maxLoadedCarCount;
 	}
 
 	@Override

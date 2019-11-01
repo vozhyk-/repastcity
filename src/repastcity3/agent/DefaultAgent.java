@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import repast.simphony.engine.environment.RunEnvironment;
 import repastcity3.environment.Building;
 import repastcity3.environment.Route;
 import repastcity3.main.ContextManager;
@@ -37,6 +38,9 @@ public class DefaultAgent implements IAgent {
 
 	private static int uniqueID = 0;
 	private int id;
+
+	private double waitForFerryStartTimestamp;
+	private double lastFerryWaitingTime;
 
 	public DefaultAgent() {
 		this.id = uniqueID++;
@@ -57,6 +61,8 @@ public class DefaultAgent implements IAgent {
 			return;
 		if (!this.route.atDestination()) {
 			this.route.travel();
+			if (isWaitingForFerry())
+				onStartedWaitingForFerry();
 			LOGGER.log(Level.FINE, this.toString() + " travelling to " + this.route.getDestinationBuilding().toString());
 		} else {
 			// Have reached destination, now either go home or onto another building
@@ -80,8 +86,24 @@ public class DefaultAgent implements IAgent {
 		return this.route != null && this.route.isFerryControlled();
 	}
 
+	private void onStartedWaitingForFerry() {
+		this.waitForFerryStartTimestamp = ticksNow();
+	}
+
+	public void onLoadingToFerry() {
+		this.lastFerryWaitingTime = ticksNow() - this.waitForFerryStartTimestamp;
+	}
+
 	public void onUnloadedFromFerry() {
 		this.route = new Route(this, this.route.getDestination(), this.route.getDestinationBuilding());
+	}
+
+	private double ticksNow() {
+		return RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
+	}
+
+	public double getLastFerryWaitingTime() {
+		return this.lastFerryWaitingTime;
 	}
 
 	/**
