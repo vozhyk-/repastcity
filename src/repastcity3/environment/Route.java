@@ -450,6 +450,8 @@ public class Route implements Cacheable {
 					setFerryControlled(true);
 					return;
 				}
+				
+				double distToNextFerry = getDistanceToNextFerry(currentCoord);
 
 				speed = this.routeSpeedsX.get(this.currentPosition);
 				/*
@@ -589,6 +591,28 @@ public class Route implements Cacheable {
 					+ (this.destinationBuilding == null ? "" : this.destinationBuilding.toString() + ")"));
 			throw e;
 		} // catch exception
+	}
+
+	private double getDistanceToNextFerry(Coordinate currentCoord) {
+		double result = 0;
+		for (int i = this.currentPosition; i < this.routeX.size(); i++) {
+			Coordinate current = this.routeX.get(i);
+			Coordinate prev;
+			if (i == this.currentPosition)
+				prev = currentCoord;
+			else
+				prev = this.routeX.get(i-1);
+
+			double[] distAndAngle = new double[2];
+			Route.distance(prev, current, distAndAngle);
+			double speed = this.routeSpeedsX.get(i);
+			result += distAndAngle[0] / speed;
+
+			if (roadsX.get(i).isFerryRoute()) {
+				break;
+			}
+		}
+		return result;
 	}
 
 	/**
