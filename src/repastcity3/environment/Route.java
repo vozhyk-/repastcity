@@ -48,9 +48,11 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 
+import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.space.gis.Geography;
 import repast.simphony.space.graph.RepastEdge;
 import repast.simphony.space.graph.ShortestPath;
+import repastcity3.agent.FerryAgent;
 import repastcity3.agent.IAgent;
 import repastcity3.exceptions.RoutingException;
 import repastcity3.main.ContextManager;
@@ -452,6 +454,7 @@ public class Route implements Cacheable {
 				}
 				
 				double distToNextFerry = getDistanceToNextFerry(currentCoord);
+				double travelPerTurn = getOptimalSpeed(distToNextFerry);
 
 				speed = this.routeSpeedsX.get(this.currentPosition);
 				/*
@@ -466,7 +469,7 @@ public class Route implements Cacheable {
 
 				double distToTarget = distAndAngle[0] / speed;
 				// If we can get all the way to the next coords on the route then just go there
-				if (distTravelled + distToTarget < GlobalVars.GEOGRAPHY_PARAMS.TRAVEL_PER_TURN) {
+				if (distTravelled + distToTarget < travelPerTurn) {
 
 					distTravelled += distToTarget;
 					currentCoord = target;
@@ -483,7 +486,7 @@ public class Route implements Cacheable {
 
 				// Check if dist to next coordinate is exactly same as maximum
 				// distance allowed to travel (unlikely but possible)
-				else if (distTravelled + distToTarget == GlobalVars.GEOGRAPHY_PARAMS.TRAVEL_PER_TURN) {
+				else if (distTravelled + distToTarget == travelPerTurn) {
 					travelledMaxDist = true;
 					ContextManager.moveAgent(agent, geomFac.createPoint(target));
 					// ContextManager.agentGeography.move(agent, geomFac.createPoint(target));
@@ -493,7 +496,7 @@ public class Route implements Cacheable {
 					// Otherwise move as far as we can towards the target along the road we're on.
 					// Move along the vector the maximum distance we're allowed this turn (take into account relative
 					// speed)
-					double distToTravel = (GlobalVars.GEOGRAPHY_PARAMS.TRAVEL_PER_TURN - distTravelled) * speed;
+					double distToTravel = (travelPerTurn - distTravelled) * speed;
 					// Move the agent, first move them to the current coord (the first part of the while loop doesn't do
 					// this for efficiency)
 					// ContextManager.agentGeography.move(this.agent, geomFac.createPoint(currentCoord));
@@ -591,6 +594,22 @@ public class Route implements Cacheable {
 					+ (this.destinationBuilding == null ? "" : this.destinationBuilding.toString() + ")"));
 			throw e;
 		} // catch exception
+	}
+
+	private double getOptimalSpeed(double distToNextFerry) {
+		double now = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
+		double[] possibleArrivalTimeRange = {
+				now + Math.ceil(distToNextFerry / maxTravelPerTurn),
+				now + Math.floor(distToNextFerry / minTravelPerTurn),
+		};
+		for (double time = possibleArrivalTimeRange[0]; time <= possibleArrivalTimeRange[1]; time++)
+			if (isFerryDepartureTime(time))
+				return distToNextFerry / (time - now);
+		return (minTravelPerTurn + maxTravelPerTurn) / 2;
+	}
+
+	private boolean isFerryDepartureTime(double time) {
+		return time % FerryAgent.DEPART_EACH_N_TICKS == 0;
 	}
 
 	private double getDistanceToNextFerry(Coordinate currentCoord) {

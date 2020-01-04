@@ -23,7 +23,7 @@ public class FerryAgent implements IAgent {
 	private static final int MIN_TRAVEL_PER_TURN = 50;
 	private static final double CLOSEST_CARS_DISTANCE = 0.005;
 	private static final double CLOSEST_TERMINAL_DISTANCE = 0.005;
-	private static final double DEPART_EACH_N_TICKS = 1000;
+	public static final double DEPART_EACH_N_TICKS = 1000;
 
 	private static Logger LOGGER = Logger.getLogger(FerryAgent.class.getName());
 
