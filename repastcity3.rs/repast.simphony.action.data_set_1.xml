@@ -1,5 +1,5 @@
 <repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.6.0">
-  <name>Mean ferry utilization</name>
+  <name>Mean time waiting for ferry</name>
   <type>AGGREGATE</type>
   <inclTick>true</inclTick>
   <inclBatchRun>false</inclBatchRun>
@@ -16,11 +16,11 @@
   <atEnd>false</atEnd>
   <methodDataSources class="linked-hash-map">
     <entry>
-      <string>Mean ferry utilization</string>
+      <string>Mean time waiting for ferry</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Mean ferry utilization</id>
-        <className>repastcity3.agent.FerryAgent</className>
-        <methodName>getLastUtilization</methodName>
+        <id>Mean time waiting for ferry</id>
+        <className>repastcity3.agent.DefaultAgent</className>
+        <methodName>getLastFerryWaitingTime</methodName>
         <aggType>MEAN</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>

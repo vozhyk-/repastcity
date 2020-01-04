@@ -3,11 +3,15 @@
   <type>GIS 3D</type>
   <styles>
     <entry>
+      <string>repastcity3.agent.IAgent</string>
+      <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
+    </entry>
+    <entry>
       <string>repastcity3.agent.ThreadedAgentScheduler</string>
       <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
     </entry>
     <entry>
-      <string>repastcity3.agent.IAgent</string>
+      <string>repastcity3.agent.FerryTerminalAgent</string>
       <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
     </entry>
     <entry>
@@ -31,7 +35,40 @@
       <string>repast.simphony.visualization.gis3D.style.DefaultMarkStyle</string>
     </entry>
   </styles>
-  <editedStyles/>
+  <editedStyles>
+    <entry>
+      <string>repastcity3.agent.IAgent</string>
+      <null/>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.ThreadedAgentScheduler</string>
+      <null/>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.FerryTerminalAgent</string>
+      <null/>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.FerryAgent</string>
+      <null/>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.AgentFactory</string>
+      <null/>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.DefaultAgent</string>
+      <null/>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.BurglarThread</string>
+      <null/>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.ThreadController</string>
+      <null/>
+    </entry>
+  </editedStyles>
   <netStyles/>
   <editedNetStyles/>
   <frequency>ON_NEW</frequency>
@@ -42,57 +79,41 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>0</hashCode>
+    <hashCode>911933780</hashCode>
   </schedParams>
   <layoutInterval>0</layoutInterval>
   <layerOrder>
     <entry>
-      <string>repastcity3.agent.ThreadedAgentScheduler</string>
-      <int>7</int>
-    </entry>
-    <entry>
       <string>repastcity3.agent.IAgent</string>
-      <int>8</int>
-    </entry>
-    <entry>
-      <string>data/gis_data/messina_strait/roads.shp</string>
-      <int>13</int>
-    </entry>
-    <entry>
-      <string>Blue Marble May 2004</string>
-      <int>1</int>
-    </entry>
-    <entry>
-      <string>Bing Imagery</string>
       <int>3</int>
     </entry>
     <entry>
-      <string>repastcity3.agent.FerryAgent</string>
-      <int>14</int>
-    </entry>
-    <entry>
-      <string>repastcity3.agent.AgentFactory</string>
-      <int>9</int>
-    </entry>
-    <entry>
-      <string>repastcity3.agent.DefaultAgent</string>
-      <int>10</int>
-    </entry>
-    <entry>
-      <string>i-cubed Landsat</string>
+      <string>repastcity3.agent.ThreadedAgentScheduler</string>
       <int>2</int>
     </entry>
     <entry>
-      <string>data/gis_data/messina_strait/buildings.shp</string>
-      <int>11</int>
+      <string>repastcity3.agent.FerryTerminalAgent</string>
+      <int>5</int>
     </entry>
     <entry>
-      <string>repastcity3.agent.BurglarThread</string>
+      <string>repastcity3.agent.FerryAgent</string>
+      <int>7</int>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.AgentFactory</string>
+      <int>4</int>
+    </entry>
+    <entry>
+      <string>repastcity3.agent.DefaultAgent</string>
       <int>6</int>
     </entry>
     <entry>
+      <string>repastcity3.agent.BurglarThread</string>
+      <int>1</int>
+    </entry>
+    <entry>
       <string>repastcity3.agent.ThreadController</string>
-      <int>5</int>
+      <int>0</int>
     </entry>
   </layerOrder>
   <projections>

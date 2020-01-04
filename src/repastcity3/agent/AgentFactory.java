@@ -24,7 +24,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.IAction;
 import repast.simphony.engine.schedule.ISchedule;
-import repast.simphony.engine.schedule.Schedule;
 import repast.simphony.engine.schedule.ScheduleParameters;
 import repastcity3.environment.Building;
 import repastcity3.environment.GISFunctions;
@@ -205,11 +204,13 @@ public class AgentFactory {
 
 		// Put a ferry agent in a ferry terminal.
 		// TODO Allow creating more ferry agents.
-		Iterator<Building> i = ContextManager.ferryTerminalContext.getRandomObjects(Building.class, numAgents)
-				.iterator();
-		Building b = i.next();
-		IAgent a = new FerryAgent();
-		putAgent(a, b);
+		Iterator<Building> randomTerminals =
+				ContextManager.ferryTerminalContext.getRandomObjects(Building.class, numAgents).iterator();
+		putAgent(new FerryAgent(), randomTerminals.next());
+
+		for (Building terminal : ContextManager.ferryTerminalContext.getObjects(Building.class)) {
+			putAgent(new FerryTerminalAgent(), terminal);
+		}
 	}
 
 	private int parseNumAgents() throws AgentCreationException {
