@@ -1,0 +1,9 @@
+/bin/
+
+Repast.settings
+.settings/org.eclipse.jdt.groovy.core.prefs
+
+data/gis_data/messina_strait/buildings_roads_coords_cache.serialised
+model_log.txt
+debug.log
+velocity.log
