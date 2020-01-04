@@ -19,9 +19,11 @@ import repastcity3.environment.SpatialIndexManager;
 import repastcity3.main.ContextManager;
 
 public class FerryAgent implements IAgent {
+	private static final int MAX_TRAVEL_PER_TURN = 50;
+	private static final int MIN_TRAVEL_PER_TURN = 50;
 	private static final double CLOSEST_CARS_DISTANCE = 0.005;
 	private static final double CLOSEST_TERMINAL_DISTANCE = 0.005;
-	private static final double DEPART_EACH_N_TICKS = 1000;
+	public static final double DEPART_EACH_N_TICKS = 1000;
 
 	private static Logger LOGGER = Logger.getLogger(FerryAgent.class.getName());
 
@@ -83,7 +85,7 @@ public class FerryAgent implements IAgent {
 
 	private void setRouteToOppositeTerminal() {
 		Building destination = getOppositeTerminal();
-		this.route = new Route(this, destination.getCoords(), destination);
+		this.route = new Route(this, destination.getCoords(), destination, MIN_TRAVEL_PER_TURN, MAX_TRAVEL_PER_TURN);
 		this.route.setTravelingAsFerry();
 	}
 
