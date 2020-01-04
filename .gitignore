@@ -5,5 +5,5 @@ Repast.settings
 
 data/gis_data/messina_strait/buildings_roads_coords_cache.serialised
 model_log.txt
-debug.log
-velocity.log
+debug.log*
+velocity.log*
