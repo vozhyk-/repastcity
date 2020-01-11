@@ -488,7 +488,6 @@ public class Route implements Cacheable {
 					ContextManager.moveAgent(agent, geomFac.createPoint(target));
 					// ContextManager.agentGeography.move(agent, geomFac.createPoint(target));
 					this.currentPosition++;
-					LOGGER.log(Level.WARNING, "Travel(): UNUSUAL CONDITION HAS OCCURED!");
 				} else {
 					// Otherwise move as far as we can towards the target along the road we're on.
 					// Move along the vector the maximum distance we're allowed this turn (take into account relative
@@ -593,8 +592,15 @@ public class Route implements Cacheable {
 		} // catch exception
 	}
 
+	// Return the optimal speed to arrive just before the ferry departs from the next ferry terminal.
 	private double getOptimalSpeed(FerryTerminalAgent terminalAgent, double distToNextFerry) {
 		if (terminalAgent == null)
+			// There is no ferry route between here and the destination,
+			// so do not adjust the speed.
+			return defaultTravelPerTurn();
+		if (distToNextFerry == 0)
+			// Already arrived at the ferry,
+			// so the speed we return here does not matter.
 			return defaultTravelPerTurn();
 		double now = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
 		double[] possibleArrivalTimeRange = {
@@ -602,8 +608,10 @@ public class Route implements Cacheable {
 				now + Math.floor(distToNextFerry / minTravelPerTurn),
 		};
 		for (double time = possibleArrivalTimeRange[0]; time <= possibleArrivalTimeRange[1]; time++)
-			if (terminalAgent.isFerryDepartureTime(time))
+			// Check time + 1 because we need to arrive one tick before the ferry departs.
+			if (terminalAgent.isFerryDepartureTime(time + 1)) {
 				return distToNextFerry / (time - now);
+			}
 		return defaultTravelPerTurn();
 	}
 
