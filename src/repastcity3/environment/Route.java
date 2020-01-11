@@ -30,29 +30,27 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.geotools.referencing.GeodeticCalculator;
-
-import cern.colt.Arrays;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 
+import cern.colt.Arrays;
 import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.space.gis.Geography;
 import repast.simphony.space.graph.RepastEdge;
 import repast.simphony.space.graph.ShortestPath;
-import repastcity3.agent.FerryAgent;
+import repastcity3.agent.FerryTerminalAgent;
 import repastcity3.agent.IAgent;
 import repastcity3.exceptions.RoutingException;
 import repastcity3.main.ContextManager;
@@ -609,7 +607,7 @@ public class Route implements Cacheable {
 	}
 
 	private boolean isFerryDepartureTime(double time) {
-		return time % FerryAgent.DEPART_EACH_N_TICKS == 0;
+		return time % FerryTerminalAgent.DEPART_EACH_N_TICKS == 0;
 	}
 
 	private double getDistanceToNextFerry(Coordinate currentCoord) {

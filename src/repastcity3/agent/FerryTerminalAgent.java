@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 import repastcity3.environment.Building;
 
 public class FerryTerminalAgent implements IAgent {
+	public static final double DEPART_EACH_N_TICKS = 1000;
+
 	private static Logger LOGGER = Logger.getLogger(FerryTerminalAgent.class.getName());
 	private Building home;
 	private static int uniqueID = 0;
@@ -19,6 +21,10 @@ public class FerryTerminalAgent implements IAgent {
 	public void step() throws Exception {
 		// TODO Auto-generated method stub
 
+	}
+
+	public boolean isFerryDepartureTime(double time) {
+		return time % DEPART_EACH_N_TICKS == 0;
 	}
 
 	@Override

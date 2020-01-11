@@ -23,7 +23,9 @@ public class FerryAgent implements IAgent {
 	private static final int MIN_TRAVEL_PER_TURN = 50;
 	private static final double CLOSEST_CARS_DISTANCE = 0.005;
 	private static final double CLOSEST_TERMINAL_DISTANCE = 0.005;
-	public static final double DEPART_EACH_N_TICKS = 1000;
+	// TODO This should really be as close to 0 as possible,
+	// as ferry terminal agents are placed exactly at ferry terminals.
+	private static final double TERMINAL_TO_TERMINAL_AGENT_DISTANCE = 0.005;
 
 	private static Logger LOGGER = Logger.getLogger(FerryAgent.class.getName());
 
@@ -60,7 +62,13 @@ public class FerryAgent implements IAgent {
 
 	private boolean timeToLeave() {
 		double now = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
-		return now % DEPART_EACH_N_TICKS == 0;
+		return getClosestTerminalAgent().isFerryDepartureTime(now);
+	}
+
+	private FerryTerminalAgent getClosestTerminalAgent() {
+		Envelope envelope = getSquareEnvelope(getClosestTerminal().getCoords(), TERMINAL_TO_TERMINAL_AGENT_DISTANCE);
+		Iterable<FerryTerminalAgent> agents = ContextManager.getAgentsWithin(envelope, FerryTerminalAgent.class);
+		return agents.iterator().next();
 	}
 
 	private void loadCars() {
@@ -112,10 +120,12 @@ public class FerryAgent implements IAgent {
 	}
 
 	private Envelope getClosestSquareEnvelope(double dist) {
-		Geometry location = ContextManager.getAgentGeometry(this);
-		Coordinate coord = location.getCoordinate();
-		Envelope envelope = new Envelope(coord.x - dist, coord.x + dist, coord.y - dist, coord.y + dist);
-		return envelope;
+		Coordinate myCoordinate = ContextManager.getAgentGeometry(this).getCoordinate();
+		return getSquareEnvelope(myCoordinate, dist);
+	}
+
+	private Envelope getSquareEnvelope(Coordinate origin, double dist) {
+		return new Envelope(origin.x - dist, origin.x + dist, origin.y - dist, origin.y + dist);
 	}
 
 	public int getLastLoadedCarCount() {
