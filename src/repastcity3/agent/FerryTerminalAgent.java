@@ -10,17 +10,24 @@ import repastcity3.environment.Building;
 import repastcity3.main.ContextManager;
 
 public class FerryTerminalAgent implements IAgent {
-	public static final double DEPART_EACH_N_TICKS = 1000;
 	// TODO This should really be as close to 0 as possible,
 	// as ferry terminal agents are placed exactly at ferry terminals.
 	static final double TERMINAL_TO_TERMINAL_AGENT_DISTANCE = 0.005;
+
+	// The time of the first possible ferry departure.
+	private double scheduleStartTime;
+	// The ferry will be able to depart every schedulePeriod ticks.
+	private double schedulePeriod;
 
 	private static Logger LOGGER = Logger.getLogger(FerryTerminalAgent.class.getName());
 	private Building home;
 	private static int uniqueID = 0;
 	private int id;
 
-	public FerryTerminalAgent() {
+	public FerryTerminalAgent(double scheduleStartTime, double schedulePeriod) {
+		this.scheduleStartTime = scheduleStartTime;
+		this.schedulePeriod = schedulePeriod;
+
 		this.id = uniqueID++;
 	}
 	
@@ -31,7 +38,8 @@ public class FerryTerminalAgent implements IAgent {
 	}
 
 	public boolean isFerryDepartureTime(double time) {
-		return time % DEPART_EACH_N_TICKS == 0;
+		// TODO This will not make sense if scheduleStartTime > schedulePeriod
+		return time % schedulePeriod == scheduleStartTime;
 	}
 
 	@Override

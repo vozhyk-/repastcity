@@ -106,6 +106,8 @@ import repastcity3.main.GlobalVars;
  * @see DefaultAgent
  */
 public class AgentFactory {
+	private static final int FERRY_DEPARTURE_SCHEDULE_PERIOD = 2000;
+	private static final int FERRY_DEPARTURE_SCHEDULE_START_TIME_STEP = 1000;
 
 	private static Logger LOGGER = Logger.getLogger(AgentFactory.class.getName());
 
@@ -208,8 +210,10 @@ public class AgentFactory {
 				ContextManager.ferryTerminalContext.getRandomObjects(Building.class, numAgents).iterator();
 		putAgent(new FerryAgent(), randomTerminals.next());
 
+		double scheduleStartTime = 0;
 		for (Building terminal : ContextManager.ferryTerminalContext.getObjects(Building.class)) {
-			putAgent(new FerryTerminalAgent(), terminal);
+			putAgent(new FerryTerminalAgent(scheduleStartTime, FERRY_DEPARTURE_SCHEDULE_PERIOD), terminal);
+			scheduleStartTime += FERRY_DEPARTURE_SCHEDULE_START_TIME_STEP;
 		}
 	}
 
