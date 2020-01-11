@@ -3,10 +3,17 @@ package repastcity3.agent;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+
 import repastcity3.environment.Building;
+import repastcity3.main.ContextManager;
 
 public class FerryTerminalAgent implements IAgent {
 	public static final double DEPART_EACH_N_TICKS = 1000;
+	// TODO This should really be as close to 0 as possible,
+	// as ferry terminal agents are placed exactly at ferry terminals.
+	static final double TERMINAL_TO_TERMINAL_AGENT_DISTANCE = 0.005;
 
 	private static Logger LOGGER = Logger.getLogger(FerryTerminalAgent.class.getName());
 	private Building home;
@@ -67,5 +74,11 @@ public class FerryTerminalAgent implements IAgent {
 	@Override
 	public int hashCode() {
 		return this.id;
+	}
+
+	public static FerryTerminalAgent getClosest(Coordinate coord) {
+		Envelope envelope = ContextManager.getSquareEnvelope(coord, TERMINAL_TO_TERMINAL_AGENT_DISTANCE);
+		Iterable<FerryTerminalAgent> agents = ContextManager.getAgentsWithin(envelope, FerryTerminalAgent.class);
+		return agents.iterator().next();
 	}
 }

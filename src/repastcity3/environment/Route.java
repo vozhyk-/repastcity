@@ -443,16 +443,15 @@ public class Route implements Cacheable {
 					prevRoad = this.roadsX.get(this.currentPosition - 1);
 				}
 
-				boolean movingWithinRoad = targetRoad.equals(prevRoad);
-				boolean roadIsSignificant = !target.equals(prevCoord);
-				boolean enteringFerryRoute = movingWithinRoad && roadIsSignificant && targetRoad.isFerryRoute();
+				boolean enteringFerryRoute = isEnteringFerryRoute(target, targetRoad, prevCoord, prevRoad);
 				if (enteringFerryRoute && !isTravelingAsFerry()) {
 					setFerryControlled(true);
 					return;
 				}
 				
-				double distToNextFerry = getDistanceToNextFerry(currentCoord);
-				double travelPerTurn = getOptimalSpeed(distToNextFerry);
+				double distToNextFerryRoute = getDistanceToNextFerryRoute(currentCoord);
+				FerryTerminalAgent terminalAgent = getNextFerryTerminalAgent(currentCoord);
+				double travelPerTurn = getOptimalSpeed(terminalAgent, distToNextFerryRoute);
 
 				speed = this.routeSpeedsX.get(this.currentPosition);
 				/*
@@ -594,23 +593,25 @@ public class Route implements Cacheable {
 		} // catch exception
 	}
 
-	private double getOptimalSpeed(double distToNextFerry) {
+	private double getOptimalSpeed(FerryTerminalAgent terminalAgent, double distToNextFerry) {
+		if (terminalAgent == null)
+			return defaultTravelPerTurn();
 		double now = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
 		double[] possibleArrivalTimeRange = {
 				now + Math.ceil(distToNextFerry / maxTravelPerTurn),
 				now + Math.floor(distToNextFerry / minTravelPerTurn),
 		};
 		for (double time = possibleArrivalTimeRange[0]; time <= possibleArrivalTimeRange[1]; time++)
-			if (isFerryDepartureTime(time))
+			if (terminalAgent.isFerryDepartureTime(time))
 				return distToNextFerry / (time - now);
+		return defaultTravelPerTurn();
+	}
+
+	private double defaultTravelPerTurn() {
 		return (minTravelPerTurn + maxTravelPerTurn) / 2;
 	}
 
-	private boolean isFerryDepartureTime(double time) {
-		return time % FerryTerminalAgent.DEPART_EACH_N_TICKS == 0;
-	}
-
-	private double getDistanceToNextFerry(Coordinate currentCoord) {
+	private double getDistanceToNextFerryRoute(Coordinate currentCoord) {
 		double result = 0;
 		for (int i = this.currentPosition; i < this.routeX.size(); i++) {
 			Coordinate current = this.routeX.get(i);
@@ -625,11 +626,38 @@ public class Route implements Cacheable {
 			double speed = this.routeSpeedsX.get(i);
 			result += distAndAngle[0] / speed;
 
+			// TODO Use isEnteringFerryRoute()?
 			if (roadsX.get(i).isFerryRoute()) {
 				break;
 			}
 		}
 		return result;
+	}
+
+	private FerryTerminalAgent getNextFerryTerminalAgent(Coordinate currentCoord) {
+		for (int i = this.currentPosition; i < this.routeX.size(); i++) {
+			Coordinate targetCoord = this.routeX.get(i);
+			Road targetRoad = this.roadsX.get(i);
+
+			Coordinate prevCoord = null;
+			Road prevRoad = null;
+			if (i - 1 >= 0) {
+				prevCoord = this.routeX.get(i - 1);
+				prevRoad = this.roadsX.get(i - 1);
+			}
+
+			boolean enteringFerryRoute = isEnteringFerryRoute(targetCoord, targetRoad, prevCoord, prevRoad);
+			if (enteringFerryRoute) {
+				return FerryTerminalAgent.getClosest(targetCoord);
+			}
+		}
+		return null;
+	}
+
+	private boolean isEnteringFerryRoute(Coordinate targetCoord, Road targetRoad, Coordinate prevCoord, Road prevRoad) {
+		boolean movingWithinRoad = targetRoad.equals(prevRoad);
+		boolean roadIsSignificant = !targetCoord.equals(prevCoord);
+		return movingWithinRoad && roadIsSignificant && targetRoad.isFerryRoute();
 	}
 
 	/**

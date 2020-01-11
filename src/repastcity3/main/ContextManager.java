@@ -31,6 +31,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -621,4 +622,7 @@ public class ContextManager implements ContextBuilder<Object> {
 		return ContextManager.agentGeography;
 	}
 
+	public static Envelope getSquareEnvelope(Coordinate origin, double dist) {
+		return new Envelope(origin.x - dist, origin.x + dist, origin.y - dist, origin.y + dist);
+	}
 }

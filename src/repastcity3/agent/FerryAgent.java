@@ -2,20 +2,17 @@ package repastcity3.agent;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 
 import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.util.collections.IndexedIterable;
 import repastcity3.environment.Building;
 import repastcity3.environment.Route;
-import repastcity3.environment.SpatialIndexManager;
 import repastcity3.main.ContextManager;
 
 public class FerryAgent implements IAgent {
@@ -23,9 +20,6 @@ public class FerryAgent implements IAgent {
 	private static final int MIN_TRAVEL_PER_TURN = 50;
 	private static final double CLOSEST_CARS_DISTANCE = 0.005;
 	private static final double CLOSEST_TERMINAL_DISTANCE = 0.005;
-	// TODO This should really be as close to 0 as possible,
-	// as ferry terminal agents are placed exactly at ferry terminals.
-	private static final double TERMINAL_TO_TERMINAL_AGENT_DISTANCE = 0.005;
 
 	private static Logger LOGGER = Logger.getLogger(FerryAgent.class.getName());
 
@@ -62,13 +56,8 @@ public class FerryAgent implements IAgent {
 
 	private boolean timeToLeave() {
 		double now = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
-		return getClosestTerminalAgent().isFerryDepartureTime(now);
-	}
-
-	private FerryTerminalAgent getClosestTerminalAgent() {
-		Envelope envelope = getSquareEnvelope(getClosestTerminal().getCoords(), TERMINAL_TO_TERMINAL_AGENT_DISTANCE);
-		Iterable<FerryTerminalAgent> agents = ContextManager.getAgentsWithin(envelope, FerryTerminalAgent.class);
-		return agents.iterator().next();
+		FerryTerminalAgent terminalAgent = FerryTerminalAgent.getClosest(getClosestTerminal().getCoords());
+		return terminalAgent.isFerryDepartureTime(now);
 	}
 
 	private void loadCars() {
@@ -121,11 +110,7 @@ public class FerryAgent implements IAgent {
 
 	private Envelope getClosestSquareEnvelope(double dist) {
 		Coordinate myCoordinate = ContextManager.getAgentGeometry(this).getCoordinate();
-		return getSquareEnvelope(myCoordinate, dist);
-	}
-
-	private Envelope getSquareEnvelope(Coordinate origin, double dist) {
-		return new Envelope(origin.x - dist, origin.x + dist, origin.y - dist, origin.y + dist);
+		return ContextManager.getSquareEnvelope(myCoordinate, dist);
 	}
 
 	public int getLastLoadedCarCount() {
