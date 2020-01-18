@@ -1,6 +1,8 @@
 package repastcity3.agent;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -24,6 +26,8 @@ public class FerryTerminalAgent implements IAgent {
 	private static int uniqueID = 0;
 	private int id;
 
+	private HashMap<TravellingAgent, Double> expectedArrivalTimes = new HashMap<>();
+
 	public FerryTerminalAgent(double scheduleStartTime, double schedulePeriod) {
 		this.scheduleStartTime = scheduleStartTime;
 		this.schedulePeriod = schedulePeriod;
@@ -33,8 +37,20 @@ public class FerryTerminalAgent implements IAgent {
 	
 	@Override
 	public void step() throws Exception {
-		// TODO Auto-generated method stub
+		this.expectedArrivalTimes.forEach((agent, arrivalTime) -> {
+			agent.receiveBestArrivalTime(beforeNextFerryDepartureTime(arrivalTime));
+		});
+	}
 
+	private double beforeNextFerryDepartureTime(double time) {
+		for (double i = Math.ceil(time); ; i++) {
+			if (isFerryDepartureTime(i + 1))
+				return i;
+		}
+	}
+
+	public void receiveExpectedArrivalTime(TravellingAgent agent, double expectedArrivalTime) {
+		this.expectedArrivalTimes.put(agent, expectedArrivalTime);
 	}
 
 	public boolean isFerryDepartureTime(double time) {

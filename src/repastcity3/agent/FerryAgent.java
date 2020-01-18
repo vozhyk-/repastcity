@@ -15,7 +15,7 @@ import repastcity3.environment.Building;
 import repastcity3.environment.Route;
 import repastcity3.main.ContextManager;
 
-public class FerryAgent implements IAgent {
+public class FerryAgent implements TravellingAgent {
 	private static final int MAX_TRAVEL_PER_TURN = 50;
 	private static final int MIN_TRAVEL_PER_TURN = 50;
 	private static final double CLOSEST_CARS_DISTANCE = 0.005;
@@ -111,6 +111,17 @@ public class FerryAgent implements IAgent {
 	private Envelope getClosestSquareEnvelope(double dist) {
 		Coordinate myCoordinate = ContextManager.getAgentGeometry(this).getCoordinate();
 		return ContextManager.getSquareEnvelope(myCoordinate, dist);
+	}
+
+	@Override
+	public void receiveBestArrivalTime(double bestArrivalTime) {
+		if (this.route != null)
+			this.route.setBestArrivalTime(bestArrivalTime);
+	}
+
+	@Override
+	public void sendExpectedArrivalTime(FerryTerminalAgent terminalAgent, double expectedArrivalTime) {
+		terminalAgent.receiveExpectedArrivalTime(this, expectedArrivalTime);
 	}
 
 	public int getLastLoadedCarCount() {

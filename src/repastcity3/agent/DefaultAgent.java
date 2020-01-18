@@ -27,7 +27,7 @@ import repastcity3.environment.Building;
 import repastcity3.environment.Route;
 import repastcity3.main.ContextManager;
 
-public class DefaultAgent implements IAgent {
+public class DefaultAgent implements IAgent, TravellingAgent {
 
 	private static final int MAX_TRAVEL_PER_TURN = 125;
 
@@ -153,6 +153,20 @@ public class DefaultAgent implements IAgent {
 	@Override
 	public int hashCode() {
 		return this.id;
+	}
+
+	/* (non-Javadoc)
+	 * @see repastcity3.agent.TravellingAgent#receiveBestArrivalTime(double)
+	 */
+	@Override
+	public void receiveBestArrivalTime(double bestArrivalTime) {
+		if (this.route != null)
+			this.route.setBestArrivalTime(bestArrivalTime);
+	}
+
+	@Override
+	public void sendExpectedArrivalTime(FerryTerminalAgent terminalAgent, double expectedArrivalTime) {
+		terminalAgent.receiveExpectedArrivalTime(this, expectedArrivalTime);
 	}
 
 }

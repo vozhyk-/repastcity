@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,7 +52,7 @@ import repast.simphony.space.gis.Geography;
 import repast.simphony.space.graph.RepastEdge;
 import repast.simphony.space.graph.ShortestPath;
 import repastcity3.agent.FerryTerminalAgent;
-import repastcity3.agent.IAgent;
+import repastcity3.agent.TravellingAgent;
 import repastcity3.exceptions.RoutingException;
 import repastcity3.main.ContextManager;
 import repastcity3.main.GlobalVars;
@@ -78,7 +79,7 @@ public class Route implements Cacheable {
 		// Route.routeCache = new Hashtable<CachedRoute, CachedRoute>();
 	}
 
-	private IAgent agent;
+	private TravellingAgent agent;
 	private Coordinate destination;
 	private Building destinationBuilding;
 
@@ -123,22 +124,10 @@ public class Route implements Cacheable {
 	// To stop threads competing for the cache:
 	private static Object buildingsOnRoadCacheLock = new Object();
 
-	/*
-	 * Store a route once it has been created, might be used later (note that the same object acts as key and value).
-	 */
-	// TODO Re-think route caching, would be better to cache the whole Route object
-	// private static volatile Map<CachedRoute, CachedRoute> routeCache;
-	// /** Store a route distance once it has been created */
-	// private static volatile Map<CachedRouteDistance, Double> routeDistanceCache;
-
-	/*
-	 * Keep a record of the last community and road passed so that the same buildings/communities aren't added to the
-	 * cognitive map multiple times (the agent could spend a number of iterations on the same road or community).
-	 */
-	private Road previousRoad;
-	private Area previousArea;
 	private double maxTravelPerTurn;
 	private double minTravelPerTurn;
+
+	private Optional<Double> bestArrivalTime = Optional.empty();
 
 	/**
 	 * Creates a new Route object.
@@ -155,7 +144,7 @@ public class Route implements Cacheable {
 	 * @param type
 	 *            The (optional) type of route, used by burglars who want to search.
 	 */
-	public Route(IAgent agent, Coordinate destination, Building destinationBuilding, double minTravelPerTurn, double maxTravelPerTurn) {
+	public Route(TravellingAgent agent, Coordinate destination, Building destinationBuilding, double minTravelPerTurn, double maxTravelPerTurn) {
 		this.destination = destination;
 		this.agent = agent;
 		this.destinationBuilding = destinationBuilding;
@@ -448,10 +437,21 @@ public class Route implements Cacheable {
 					setFerryControlled(true);
 					return;
 				}
-				
-				double distToNextFerryRoute = getDistanceToNextFerryRoute(currentCoord);
-				FerryTerminalAgent terminalAgent = getNextFerryTerminalAgent(currentCoord);
-				double travelPerTurn = getOptimalSpeed(terminalAgent, distToNextFerryRoute);
+
+				double travelPerTurn = defaultTravelPerTurn();
+				// TODO Make this work for ferries as well.
+				if (!isTravelingAsFerry()) {
+					double distToNextFerryRoute = getDistanceToNextFerryRoute(currentCoord);
+					FerryTerminalAgent terminalAgent = getNextFerryTerminalAgent(currentCoord);
+
+					if (terminalAgent != null) {
+						double now = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
+						travelPerTurn = getOptimalSpeed(now, distToNextFerryRoute, this.bestArrivalTime);
+
+						double expectedArrivalTime = now + distToNextFerryRoute / travelPerTurn;
+						this.agent.sendExpectedArrivalTime(terminalAgent, expectedArrivalTime);
+					}
+				}
 
 				speed = this.routeSpeedsX.get(this.currentPosition);
 				/*
@@ -593,25 +593,19 @@ public class Route implements Cacheable {
 	}
 
 	// Return the optimal speed to arrive just before the ferry departs from the next ferry terminal.
-	private double getOptimalSpeed(FerryTerminalAgent terminalAgent, double distToNextFerry) {
-		if (terminalAgent == null)
-			// There is no ferry route between here and the destination,
-			// so do not adjust the speed.
-			return defaultTravelPerTurn();
+	private double getOptimalSpeed(double now, double distToNextFerry, Optional<Double> bestArrivalTime) {
 		if (distToNextFerry == 0)
 			// Already arrived at the ferry,
 			// so the speed we return here does not matter.
 			return defaultTravelPerTurn();
-		double now = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
 		double[] possibleArrivalTimeRange = {
 				now + Math.ceil(distToNextFerry / maxTravelPerTurn),
 				now + Math.floor(distToNextFerry / minTravelPerTurn),
 		};
-		for (double time = possibleArrivalTimeRange[0]; time <= possibleArrivalTimeRange[1]; time++)
-			// Check time + 1 because we need to arrive one tick before the ferry departs.
-			if (terminalAgent.isFerryDepartureTime(time + 1)) {
-				return distToNextFerry / (time - now);
-			}
+		if (bestArrivalTime.isEmpty())
+			return defaultTravelPerTurn();
+		if (bestArrivalTime.get() >= possibleArrivalTimeRange[0] && bestArrivalTime.get() <= possibleArrivalTimeRange[1])
+			return distToNextFerry / (bestArrivalTime.get() - now);
 		return defaultTravelPerTurn();
 	}
 
@@ -678,7 +672,7 @@ public class Route implements Cacheable {
 	 * @param destination
 	 * @return
 	 */
-	public double getDistance(IAgent theBurglar, Coordinate origin, Coordinate destination) {
+	public double getDistance(TravellingAgent theBurglar, Coordinate origin, Coordinate destination) {
 
 		// // See if this distance has already been calculated
 		// if (Route.routeDistanceCache == null) {
@@ -1123,65 +1117,16 @@ public class Route implements Cacheable {
 		this._isFerryControlled = value;
 	}
 
-	// /**
-	// * Removes any duplicate coordinates from the curent route (coordinates which
-	// * are the same *and* next to each other in the list).
-	// * <p>
-	// * If my route-generating algorithm was better this would't be necessary.
-	// */
-	// @Deprecated
-	// private void removePairs() throws RoutingException {
-	// if (this.routeX.size() < 1) {
-	// // No coords to iterate over, probably something has gone wrong
-	// throw new RoutingException("Route.removeDuplicateCoordinates(): WARNING an empty list has been "
-	// + "passed to this function, something has probably gone wrong");
-	// }
-	// TempLogger.out("ROUTE BEFORE REMOVING PAIRS");
-	// this.printRoute();
-	//
-	// // (setRoute() has already checked that lists are same size)
-	//
-	// // Iterate over the list, removing coordinates that are the same as their neighbours.
-	// // (and associated objects in other lists)
-	// Iterator<Road> roadIt = this.roadsX.iterator();
-	// Iterator<Coordinate> routeIt = this.routeX.iterator();
-	// Iterator<Double> routeSpeedIt = this.routeSpeedsX.iterator();
-	// Iterator<String> routeDescIt = this.routeDescriptionX.iterator();
-	// Coordinate c1, c2;
-	// Road currentRoad = roadIt.next();
-	// Road nextRoad = null;
-	// routeIt.next(); routeSpeedIt.next(); routeDescIt.next();
-	// while ( roadIt.hasNext() ) {
-	// nextRoad = roadIt.next();
-	// routeIt.next();
-	// routeSpeedIt.next();
-	// routeDescIt.next();
-	//
-	// c1 = currentRoad.getCoords();
-	// c2 = nextRoad.getCoords();
-	//
-	// if (c1.equals(c2)) {
-	// // Remove objects from the lists
-	// roadIt.remove();
-	// routeIt.remove();
-	// routeSpeedIt.remove();
-	// routeDescIt.remove();
-	// }
-	// else {
-	// currentRoad = nextRoad;
-	// }
-	// }
-	//
-	// TempLogger.out("ROUTE AFTER REMOVING PAIRS");
-	// this.printRoute();
-	// }
-
 	public boolean isTravelingAsFerry() {
 		return _travelingAsFerry;
 	}
 
 	public void setTravelingAsFerry() {
 		this._travelingAsFerry = true;
+	}
+
+	public void setBestArrivalTime(double bestArrivalTime) {
+		this.bestArrivalTime = Optional.of(bestArrivalTime);
 	}
 
 	private void printRoute() {
