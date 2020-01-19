@@ -2,12 +2,14 @@ package repastcity3.agent;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
+import repast.simphony.engine.environment.RunEnvironment;
 import repastcity3.environment.Building;
 import repastcity3.main.ContextManager;
 
@@ -26,7 +28,8 @@ public class FerryTerminalAgent implements IAgent {
 	private static int uniqueID = 0;
 	private int id;
 
-	private HashMap<TravellingAgent, Double> expectedArrivalTimes = new HashMap<>();
+	private HashMap<DefaultAgent, Double> expectedCarArrivalTimes = new HashMap<>();
+	private Optional<Double> nextFerryDepartureTime = Optional.empty();
 
 	public FerryTerminalAgent(double scheduleStartTime, double schedulePeriod) {
 		this.scheduleStartTime = scheduleStartTime;
@@ -37,20 +40,36 @@ public class FerryTerminalAgent implements IAgent {
 	
 	@Override
 	public void step() throws Exception {
-		this.expectedArrivalTimes.forEach((agent, arrivalTime) -> {
-			agent.receiveBestArrivalTime(beforeNextFerryDepartureTime(arrivalTime));
+		if (this.nextFerryDepartureTime.isEmpty())
+			return;
+
+		double beforeFerryDeparture = this.nextFerryDepartureTime.get() - 1;
+		double now = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
+		if (beforeFerryDeparture < now)
+			return;
+
+		this.expectedCarArrivalTimes.forEach((car, arrivalTime) -> {
+			sendBestArrivalTime(car, beforeFerryDeparture);
 		});
 	}
 
-	private double beforeNextFerryDepartureTime(double time) {
-		for (double i = Math.ceil(time); ; i++) {
-			if (isFerryDepartureTime(i + 1))
-				return i;
-		}
+	private void sendBestArrivalTime(DefaultAgent car, double time) {
+		car.receiveBestArrivalTime(time);
 	}
 
-	public void receiveExpectedArrivalTime(TravellingAgent agent, double expectedArrivalTime) {
-		this.expectedArrivalTimes.put(agent, expectedArrivalTime);
+	public void receiveExpectedArrivalTime(IAgent agent, double expectedArrivalTime) {
+		if (agent instanceof DefaultAgent)
+			this.expectedCarArrivalTimes.put((DefaultAgent) agent, expectedArrivalTime);
+
+		if (agent instanceof FerryAgent)
+			this.nextFerryDepartureTime = Optional.of(nextFerryDepartureTime(expectedArrivalTime));
+	}
+
+	private double nextFerryDepartureTime(double expectedFerryArrivalTime) {
+		for (double i = Math.ceil(expectedFerryArrivalTime); ; i++) {
+			if (isFerryDepartureTime(i))
+				return i;
+		}
 	}
 
 	public boolean isFerryDepartureTime(double time) {

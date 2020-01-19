@@ -439,18 +439,23 @@ public class Route implements Cacheable {
 				}
 
 				double travelPerTurn = defaultTravelPerTurn();
-				// TODO Make this work for ferries as well.
+				double now = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
 				if (!isTravelingAsFerry()) {
-					double distToNextFerryRoute = getDistanceToNextFerryRoute(currentCoord);
 					FerryTerminalAgent terminalAgent = getNextFerryTerminalAgent(currentCoord);
 
 					if (terminalAgent != null) {
-						double now = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
+						double distToNextFerryRoute = getDistanceToNextFerryRoute(currentCoord);
+
 						travelPerTurn = getOptimalSpeed(now, distToNextFerryRoute, this.bestArrivalTime);
 
 						double expectedArrivalTime = now + distToNextFerryRoute / travelPerTurn;
 						this.agent.sendExpectedArrivalTime(terminalAgent, expectedArrivalTime);
 					}
+				} else {
+					FerryTerminalAgent terminalAgent = FerryTerminalAgent.getClosest(this.destination);
+					double distanceToDestination = getDistanceToDestination(currentCoord);
+					double expectedArrivalTime = now + Math.ceil(distanceToDestination / travelPerTurn);
+					this.agent.sendExpectedArrivalTime(terminalAgent, expectedArrivalTime);
 				}
 
 				speed = this.routeSpeedsX.get(this.currentPosition);
@@ -632,6 +637,24 @@ public class Route implements Cacheable {
 			if (roadsX.get(i).isFerryRoute()) {
 				break;
 			}
+		}
+		return result;
+	}
+
+	private double getDistanceToDestination(Coordinate currentCoord) {
+		double result = 0;
+		for (int i = this.currentPosition; i < this.routeX.size(); i++) {
+			Coordinate current = this.routeX.get(i);
+			Coordinate prev;
+			if (i == this.currentPosition)
+				prev = currentCoord;
+			else
+				prev = this.routeX.get(i-1);
+
+			double[] distAndAngle = new double[2];
+			Route.distance(prev, current, distAndAngle);
+			double speed = this.routeSpeedsX.get(i);
+			result += distAndAngle[0] / speed;
 		}
 		return result;
 	}
